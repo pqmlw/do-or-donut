@@ -14,8 +14,7 @@ HF_TOKEN = None
 HIGH_THRESHOLD = 0.85
 MEDIUM_THRESHOLD = 0.60
 
-# Set True untuk menampilkan label mentah dari model di halaman hasil (untuk cek)
-DEBUG_LABEL = True
+DEBUG_LABEL = False
 
 st.set_page_config(page_title="Do or Donut", page_icon="🍩", layout="wide")
 
