@@ -190,14 +190,11 @@ header[data-testid="stHeader"] button { color: var(--ink); }
     background: #1E1412; box-shadow: 0 8px 22px var(--img-shadow);
 }
 /* tombol TAKE PHOTO di bawah kotak */
-/* CADANGAN: tombol apa pun yang ada DI DALAM kotak kamera = tombol switch (bulat kecil, pojok kanan atas) */
-[data-testid="stCameraInput"] [data-testid="stCameraInputWebcamStyledBox"] button {
-    position: absolute !important; top: 12px; right: 12px; left: auto; bottom: auto; z-index: 5;
-    width: 40px !important; min-width: 0 !important; height: 40px !important;
-    margin: 0 !important; padding: 0 !important; border-radius: 50% !important;
-    display: inline-flex !important; align-items: center; justify-content: center;
-    background: rgba(62,34,24,.62) !important; border: none !important;
-    box-shadow: 0 4px 12px var(--img-shadow) !important;
+[data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]) {
+    position: static !important; display: block; width: auto !important; min-width: 230px;
+    margin: 20px auto 0 !important; padding: 12px 36px; height: auto;
+    background: var(--pink) !important; border: none !important; border-radius: 99px !important;
+    box-shadow: 0 0 0 6px rgba(255,92,138,.18) !important; transition: all .18s ease;
 }
 [data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]):hover { background: var(--pink-hover) !important; }
 [data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]),
@@ -205,6 +202,34 @@ header[data-testid="stHeader"] button { color: var(--ink); }
     color: #fff !important; font-weight: 700; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase;
 }
 [data-testid="stCameraInput"] small, [data-testid="stCameraInput"] p { color: var(--ink-soft); }
+
+/* tombol SWITCH CAMERA: lingkaran kecil di pojok kanan atas kotak.
+   Kena dua kemungkinan: (a) elemen ber-data-testid switch, (b) tombol apa pun yang ada di dalam kotak kamera */
+[data-testid="stCameraInput"] [data-testid="stCameraInputSwitchButton"],
+[data-testid="stCameraInput"] [data-testid="stCameraInputWebcamStyledBox"] button:not([data-testid="stCameraInputSwitchButton"] button) {
+    position: absolute !important; top: 12px !important; right: 12px !important; left: auto !important; bottom: auto !important;
+    z-index: 5; width: 40px !important; height: 40px !important; min-width: 0 !important;
+    margin: 0 !important; padding: 0 !important; border-radius: 50% !important;
+    display: inline-flex !important; align-items: center; justify-content: center;
+    background: rgba(62,34,24,.62) !important; border: none !important;
+    box-shadow: 0 4px 12px var(--img-shadow) !important; transition: background .18s ease;
+}
+[data-testid="stCameraInput"] [data-testid="stCameraInputSwitchButton"]:hover,
+[data-testid="stCameraInput"] [data-testid="stCameraInputWebcamStyledBox"] button:not([data-testid="stCameraInputSwitchButton"] button):hover {
+    background: var(--pink) !important;
+}
+/* kalau data-testid ada di pembungkus, tombol di dalamnya cukup mengisi lingkaran */
+[data-testid="stCameraInput"] [data-testid="stCameraInputSwitchButton"] button {
+    position: static !important; width: 100% !important; height: 100% !important; min-width: 0 !important;
+    margin: 0 !important; padding: 0 !important; border: none !important; border-radius: 50% !important;
+    background: transparent !important; box-shadow: none !important;
+    display: flex !important; align-items: center; justify-content: center;
+}
+[data-testid="stCameraInput"] [data-testid="stCameraInputSwitchButton"] svg,
+[data-testid="stCameraInput"] [data-testid="stCameraInputWebcamStyledBox"] button svg {
+    width: 20px; height: 20px; color: #fff !important; fill: currentColor;
+}
+
 /* petunjuk di bawah tombol */
 [data-testid="stCameraInput"]::after {
     content: "Izinkan akses kamera di browser, lalu ambil foto";
