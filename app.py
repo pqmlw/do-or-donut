@@ -190,11 +190,14 @@ header[data-testid="stHeader"] button { color: var(--ink); }
     background: #1E1412; box-shadow: 0 8px 22px var(--img-shadow);
 }
 /* tombol TAKE PHOTO di bawah kotak */
-[data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]) {
-    position: static !important; display: block; width: auto !important; min-width: 230px;
-    margin: 20px auto 0 !important; padding: 12px 36px; height: auto;
-    background: var(--pink) !important; border: none !important; border-radius: 99px !important;
-    box-shadow: 0 0 0 6px rgba(255,92,138,.18) !important; transition: all .18s ease;
+/* CADANGAN: tombol apa pun yang ada DI DALAM kotak kamera = tombol switch (bulat kecil, pojok kanan atas) */
+[data-testid="stCameraInput"] [data-testid="stCameraInputWebcamStyledBox"] button {
+    position: absolute !important; top: 12px; right: 12px; left: auto; bottom: auto; z-index: 5;
+    width: 40px !important; min-width: 0 !important; height: 40px !important;
+    margin: 0 !important; padding: 0 !important; border-radius: 50% !important;
+    display: inline-flex !important; align-items: center; justify-content: center;
+    background: rgba(62,34,24,.62) !important; border: none !important;
+    box-shadow: 0 4px 12px var(--img-shadow) !important;
 }
 [data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]):hover { background: var(--pink-hover) !important; }
 [data-testid="stCameraInput"] button:not([data-testid="stCameraInputSwitchButton"]),
@@ -485,7 +488,6 @@ def result_html(label, score, ranked):
 def page_classification():
     hero("Classification", "Unggah foto donat atau ambil gambar langsung dari kamera untuk mulai klasifikasi.")
 
-    # satu slot untuk semua tampilan, supaya elemen lama tidak tersisa
     slot = st.empty()
 
     # ---------- Hasil ----------
