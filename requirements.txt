@@ -2,3 +2,5 @@ streamlit
 torch
 transformers
 Pillow
+rembg
+onnxruntime

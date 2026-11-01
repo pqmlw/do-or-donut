@@ -4,7 +4,7 @@ import streamlit as st
 import torch
 from PIL import Image
 from transformers import AutoImageProcessor, AutoModelForImageClassification
-
+from rembg import remove, new_session
 # ============================================================
 # KONFIGURASI
 # ============================================================
@@ -365,6 +365,23 @@ def load_model():
     model.eval()
     return processor, model
 
+# ============================================================
+# REMBG 
+# ============================================================
+REMBG_MODEL = "u2net"        
+BG_COLOR = (255, 255, 255)    
+
+
+@st.cache_resource(show_spinner="Memuat model penghapus background...")
+def load_rembg_session():
+    return new_session(REMBG_MODEL)
+
+def remove_background(image: Image.Image) -> Image.Image:
+    session = load_rembg_session()
+    cutout = remove(image.convert("RGB"), session=session)  # hasil RGBA
+    bg = Image.new("RGB", cutout.size, BG_COLOR)
+    bg.paste(cutout, mask=cutout.split()[3])
+    return bg
 
 # Kunci = label asli dari model (huruf kecil, spasi/"-" dianggap "_")
 # Nilai = nama yang ditampilkan di aplikasi
@@ -398,6 +415,7 @@ def prettify(label: str) -> str:
 
 def predict(image: Image.Image):
     processor, model = load_model()
+    image = remove_background(image)
     inputs = processor(images=image.convert("RGB"), return_tensors="pt")
     with torch.no_grad():
         logits = model(**inputs).logits
