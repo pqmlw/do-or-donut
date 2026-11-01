@@ -8,7 +8,7 @@ from rembg import remove, new_session
 # ============================================================
 # KONFIGURASI
 # ============================================================
-HF_MODEL_ID = "pqmlw/vit-donat"
+HF_MODEL_ID = "pqmlw/vit_donat_4"
 HF_TOKEN = None
 
 HIGH_THRESHOLD = 0.85
