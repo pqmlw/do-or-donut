@@ -1,10 +1,11 @@
+import gc
 import re
 
 import streamlit as st
 import torch
 from PIL import Image
 from transformers import AutoImageProcessor, AutoModelForImageClassification
-from rembg import remove, new_session
+
 # ============================================================
 # KONFIGURASI
 # ============================================================
@@ -16,23 +17,12 @@ MEDIUM_THRESHOLD = 0.60
 
 DEBUG_LABEL = False
 
+USE_REMBG = True         
+REMBG_MODEL = "u2net"     
+BG_COLOR = (255, 255, 255)
+MAX_SIDE = 1024       
+
 st.set_page_config(page_title="Do or Donut", page_icon="🍩", layout="wide")
-
-# ============================================================
-# MUAT MODEL (SEKALI SAJA)
-# ============================================================
-@st.cache_resource(show_spinner="Memuat model...")
-def load_model():
-    model = AutoModelForImageClassification.from_pretrained(
-        HF_MODEL_ID,
-        token=HF_TOKEN,
-        low_cpu_mem_usage=True,
-    )
-    processor = AutoImageProcessor.from_pretrained(HF_MODEL_ID, token=HF_TOKEN)
-    model.eval()
-    return model, processor
-
-model, processor = load_model()
 
 # ============================================================
 # STYLE
@@ -377,26 +367,34 @@ def _get_token():
 def load_model():
     token = _get_token()
     processor = AutoImageProcessor.from_pretrained(HF_MODEL_ID, token=token)
-    model = AutoModelForImageClassification.from_pretrained(HF_MODEL_ID, token=token)
+    model = AutoModelForImageClassification.from_pretrained(
+        HF_MODEL_ID, token=token, low_cpu_mem_usage=True
+    )
     model.eval()
+    for p in model.parameters():
+        p.requires_grad = False
     return processor, model
-
-# ============================================================
-# REMBG 
-# ============================================================
-REMBG_MODEL = "u2net"        
-BG_COLOR = (255, 255, 255)    
 
 
 @st.cache_resource(show_spinner="Memuat model penghapus background...")
 def load_rembg_session():
+    from rembg import new_session      # diimpor hanya saat dipakai
     return new_session(REMBG_MODEL)
 
+
+def shrink(img: Image.Image, max_side: int = MAX_SIDE) -> Image.Image:
+    img = img.convert("RGB")
+    img.thumbnail((max_side, max_side))
+    return img
+
+
 def remove_background(image: Image.Image) -> Image.Image:
+    from rembg import remove
     session = load_rembg_session()
-    cutout = remove(image.convert("RGB"), session=session)  # hasil RGBA
+    cutout = remove(image, session=session)          # RGBA
     bg = Image.new("RGB", cutout.size, BG_COLOR)
-    bg.paste(cutout, mask=cutout.split()[3])
+    bg.paste(cutout, mask=cutout.getchannel("A"))
+    del cutout
     return bg
 
 # Kunci = label asli dari model (huruf kecil, spasi/"-" dianggap "_")
@@ -431,16 +429,20 @@ def prettify(label: str) -> str:
 
 def predict(image: Image.Image):
     processor, model = load_model()
-    image = remove_background(image)
-    inputs = processor(images=image.convert("RGB"), return_tensors="pt")
-    with torch.no_grad():
+    if USE_REMBG:
+        image = remove_background(image)
+    inputs = processor(images=image, return_tensors="pt")
+    with torch.inference_mode():
         logits = model(**inputs).logits
-    probs = torch.softmax(logits, dim=-1)[0]
+    probs = torch.softmax(logits, dim=-1)[0].tolist()
+    id2label = model.config.id2label
     ranked = sorted(
-        [(model.config.id2label[i], float(p)) for i, p in enumerate(probs)],
+        ((id2label[i], p) for i, p in enumerate(probs)),
         key=lambda x: x[1],
         reverse=True,
     )
+    del inputs, logits
+    gc.collect()
     return ranked[0][0], ranked[0][1], ranked
 
 
@@ -616,11 +618,11 @@ def page_classification():
                 label_visibility="collapsed",
             )
             if f is not None:
-                picked = Image.open(f).convert("RGB")
+                picked = shrink(Image.open(f))
         else:
             c = st.camera_input("Ambil foto donat", key=f"camera_{key}", label_visibility="collapsed")
             if c is not None:
-                picked = Image.open(c).convert("RGB")
+                picked = shrink(Image.open(c))
 
     if picked is not None:
         st.session_state.pending = picked
