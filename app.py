@@ -19,6 +19,22 @@ DEBUG_LABEL = False
 st.set_page_config(page_title="Do or Donut", page_icon="🍩", layout="wide")
 
 # ============================================================
+# MUAT MODEL (SEKALI SAJA)
+# ============================================================
+@st.cache_resource(show_spinner="Memuat model...")
+def load_model():
+    model = AutoModelForImageClassification.from_pretrained(
+        HF_MODEL_ID,
+        token=HF_TOKEN,
+        low_cpu_mem_usage=True,
+    )
+    processor = AutoImageProcessor.from_pretrained(HF_MODEL_ID, token=HF_TOKEN)
+    model.eval()
+    return model, processor
+
+model, processor = load_model()
+
+# ============================================================
 # STYLE
 # ============================================================
 FONT_IMPORT = """
