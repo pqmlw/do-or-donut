@@ -158,15 +158,21 @@ header[data-testid="stHeader"] button { color: var(--ink); }
     content: "Drag & drop foto donat di sini";
     display: block; text-align: center; font-weight: 700; font-size: 1rem; line-height: 1.4; color: var(--ink);
 }
-/* tombol besar UPLOAD IMAGE */
-[data-testid="stFileUploader"] section button {
+/* tombol besar UPLOAD IMAGE: hanya tombol utama (anak langsung section) */
+[data-testid="stFileUploader"] section > button {
     font-size: 0; padding: 12px 36px; border: none; border-radius: 99px; margin: 0 auto;
     flex: 0 0 auto; background: var(--pink); box-shadow: 0 0 0 6px rgba(255,92,138,.18);
 }
-[data-testid="stFileUploader"] section button * { display: none; }
-[data-testid="stFileUploader"] section button::after {
+[data-testid="stFileUploader"] section > button * { display: none; }
+[data-testid="stFileUploader"] section > button::after {
     content: "UPLOAD IMAGE"; font-size: .95rem; font-weight: 700; letter-spacing: .08em; color: #fff;
 }
+[data-testid="stFileUploader"] section > button:hover { background: var(--pink-hover); }
+
+/* sembunyikan daftar file yang sudah dipilih (tombol X + nama file) */
+[data-testid="stFileUploaderFile"],
+[data-testid="stFileUploaderFileList"] { display: none !important; }
+
 [data-testid="stFileUploader"] section button:hover { background: var(--pink-hover); }
 /* petunjuk format di bawah */
 [data-testid="stFileUploader"] section::after {
@@ -315,7 +321,7 @@ section.main .stButton > button, [data-testid="stMain"] .stButton > button {
 .row .name { width: 44%; font-weight: 500; }
 .row .track { flex: 1; height: 8px; background: var(--track); border-radius: 99px; overflow: hidden; }
 .row .track > div { height: 100%; background: var(--bar); border-radius: 99px; }
-.row .val { width: 52px; text-align: right; font-weight: 700; }
+.row .val { width: 84px; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ---------- TUTORIAL ---------- */
 .step { display: flex; gap: 16px; align-items: flex-start; background: var(--card); border: 2px solid var(--line);
@@ -528,7 +534,7 @@ def result_html(label, score, ranked):
         <div class="row">
             <div class="name">{prettify(n)}</div>
             <div class="track"><div style="width:{p * 100:.1f}%"></div></div>
-            <div class="val">{p * 100:.1f}%</div>
+            <div class="val">{p:.6f}</div>
         </div>"""
         for n, p in ranked
     )
